@@ -1,6 +1,6 @@
 # initialize from the image
 
-FROM debian:9
+FROM python:3.7.3
 
 ARG TOOLCHAIN_FLAVOR=linux
 ENV TOOLCHAIN_FLAVOR=$TOOLCHAIN_FLAVOR
@@ -8,16 +8,25 @@ ENV TOOLCHAIN_FLAVOR=$TOOLCHAIN_FLAVOR
 # install build tools and dependencies
 
 RUN apt-get update && apt-get install -y \
-    build-essential wget git python3-pip
+    build-essential wget git libsodium-dev graphviz \
+    valgrind check libssl-dev libusb-1.0-0-dev libudev-dev zlib1g-dev \
+    libsdl2-dev libsdl2-image-dev
+
+# install clang-format 6 from backports
+RUN echo "deb http://deb.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/backports.list
+RUN apt-get update && apt-get install -t stretch-backports -y clang-format-6.0
+RUN ln -s clang-format-6.0 /usr/bin/clang-format
+
+# TODO are all apt packages actually needed?
 
 # install dependencies from toolchain source build
 
 RUN if [ "$TOOLCHAIN_FLAVOR" = "src" ]; then \
-        apt-get install -y autoconf autogen bison dejagnu \
-                           flex flip gawk git gperf gzip nsis \
-                           openssh-client p7zip-full perl python-dev \
-                           libisl-dev tcl tofrodos zip \
-                           texinfo texlive texlive-extra-utils; \
+    apt-get install -y autoconf autogen bison dejagnu \
+    flex flip gawk git gperf gzip nsis \
+    openssh-client p7zip-full perl python-dev \
+    libisl-dev tcl tofrodos zip \
+    texinfo texlive texlive-extra-utils; \
     fi
 
 # download toolchain
@@ -39,11 +48,11 @@ RUN cd /opt && tar xfj $TOOLCHAIN_LONGVER-$TOOLCHAIN_FLAVOR.tar.bz2
 # build toolchain (if required)
 
 RUN if [ "$TOOLCHAIN_FLAVOR" = "src" ]; then \
-        pushd /opt/$TOOLCHAIN_LONGVER ; \
-        ./install-sources.sh --skip_steps=mingw32 ; \
-        ./build-prerequisites.sh --skip_steps=mingw32 ; \
-        ./build-toolchain.sh --skip_steps=mingw32,manual ; \
-        popd ; \
+    pushd /opt/$TOOLCHAIN_LONGVER ; \
+    ./install-sources.sh --skip_steps=mingw32 ; \
+    ./build-prerequisites.sh --skip_steps=mingw32 ; \
+    ./build-toolchain.sh --skip_steps=mingw32,manual ; \
+    popd ; \
     fi
 
 # download protobuf
@@ -57,13 +66,21 @@ RUN echo "${PROTOBUF_HASH} protoc-${PROTOBUF_VERSION}-linux-x86_64.zip" | sha256
 
 ENV PATH=/opt/$TOOLCHAIN_LONGVER/bin:$PATH
 
-ENV PYTHON=python3
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
-RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # use zipfile module to extract files world-readable
+ENV PYTHON=python
+
 RUN $PYTHON -m zipfile -e "protoc-${PROTOBUF_VERSION}-linux-x86_64.zip" /usr/local && chmod 755 /usr/local/bin/protoc
 
+ENV WORKON_HOME=/tmp/.venvs
+
 # install python dependencies
+
+RUN pip install pipenv
+
+RUN $PYTHON --version
+RUN pip --version
+RUN pipenv --version
 
 RUN $PYTHON -m pip install scons trezor

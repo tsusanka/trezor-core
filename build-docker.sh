@@ -29,4 +29,4 @@ docker run -t -v $(pwd):/local -v $(pwd)/build-docker:/build:z --user="$(stat -c
 	ln -s /build build &&
 	git checkout $TAG && \
 	git submodule update --init --recursive && \
-	PRODUCTION=$PRODUCTION make clean vendor build_boardloader build_bootloader build_prodtest build_firmware"
+	PRODUCTION=$PRODUCTION make clean vendor build_unix_noui_frozen"

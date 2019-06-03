@@ -17,10 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#ifndef TREZOR_EMULATOR_NOUI
 #include <SDL2/SDL.h>
-#endif
+#include <stdint.h>
 
 #include "touch.h"
 
@@ -32,7 +30,6 @@ extern void display_save(const char *prefix);
 
 uint32_t touch_read(void)
 {
-#ifndef TREZOR_EMULATOR_NOUI
     SDL_Event event;
     SDL_PumpEvents();
     if (SDL_PollEvent(&event) > 0) {
@@ -105,6 +102,5 @@ uint32_t touch_read(void)
                 break;
         }
     }
-#endif
     return 0;
 }
