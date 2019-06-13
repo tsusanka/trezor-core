@@ -25,15 +25,10 @@
 //   ~/${PROFILE_HOMEDOT}/${TREZOR_PROFILE}
 // If the variable is not set the default is ${PROFILE_DEFAULT}
 
-#ifndef PROFILE_DEFAULT
-#define PROFILE_DEFAULT "/var/tmp"
-#endif
+#define PROFILE_DIR_DEFAULT "/var/tmp"
+#define PROFILE_NAME_DEFAULT "/var/tmp"
 
-#ifndef PROFILE_HOMEDOT
-#define PROFILE_HOMEDOT ".trezoremu"
-#endif
-
-void profile_init(void);
+const char *profile_name(void);
 const char *profile_dir(void);
 const char *profile_flash_path(void);
 const char *profile_sdcard_path(void);

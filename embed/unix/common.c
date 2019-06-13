@@ -25,10 +25,12 @@
 #include "display.h"
 #include "memzero.h"
 
+extern void main_clean_exit();
+
 void __shutdown(void)
 {
     printf("SHUTDOWN\n");
-    exit(3);
+    main_clean_exit();
 }
 
 #define COLOR_FATAL_ERROR RGB16(0x7F, 0x00, 0x00)

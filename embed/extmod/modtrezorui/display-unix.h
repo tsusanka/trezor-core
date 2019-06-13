@@ -19,7 +19,9 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include "profile.h"
 
 #define EMULATOR_BORDER 16
 
@@ -93,8 +95,13 @@ void display_init(void)
         printf("%s\n", SDL_GetError());
         ensure(secfalse, "SDL_Init error");
     }
+
+    char *window_title;
+    if (!asprintf(&window_title, "TREZOR^emu: %s", profile_name())) {
+        window_title = "TREZOR^emu";
+    }
     atexit(SDL_Quit);
-    SDL_Window *win = SDL_CreateWindow("TREZOR Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT,
+    SDL_Window *win = SDL_CreateWindow(window_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT,
 #ifdef TREZOR_EMULATOR_RASPI
         SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN
 #else
